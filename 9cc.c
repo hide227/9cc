@@ -218,29 +218,22 @@ int main(int argc, char **argv)
     return 1;
   }
 
+  // tokenize and parse input code
   user_input = argv[1];
-
-  // tokenize
   token = tokenize();
-  
+  Node *node = expr();
+
+  // output the first half of assembly
   printf(".intel_syntax noprefix\n");
   printf(".globl main\n");
   printf("main:\n");
 
-  // the first token must be a number
-  printf("  mov rax, %d\n", expect_number());
+  // traverse the AST to emit assembly
+  gen(node);
 
-  // output assembly
-  while (!at_eof()) {
-    if (consume('+')) {
-      printf("  add rax, %d\n", expect_number());
-      continue;
-    }
-
-    expect('-');
-    printf("  sub rax, %d\n", expect_number());
-  }
-  
+  // a result must be at the top of the stack, so pop it
+  // to RAX to make it a program exit code
+  printf("  pop rax\n");
   printf("  ret\n");
   return 0;
 }
