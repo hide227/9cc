@@ -190,7 +190,7 @@ void gen(Node *node) {
   gen(node->rhs);
 
   printf("  pop rdi\n");
-  printf("  pop rdx\n");
+  printf("  pop rax\n");
 
   switch (node->kind) {
   case ND_ADD:
