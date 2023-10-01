@@ -1,27 +1,6 @@
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "9cc.h"
 
-// kind of token
-typedef enum {
-  TK_RESERVED, // keywords or punctuators
-  TK_NUM,      // integer literals
-  TK_EOF,      // EOF markers
-} TokenKind;
-
-typedef struct Token Token;
-
-// token type
-struct Token {
-  TokenKind kind; // type of token
-  Token *next;    // next input token
-  int val;        // value of TK_NUM
-  char *str;      // token literal
-  int len;        // token length
-};
+typedef struct Node Node;
 
 // kind of AST node
 typedef enum {
@@ -36,8 +15,6 @@ typedef enum {
   ND_NUM, // integer
 } NodeKind;
 
-typedef struct Node Node;
-
 // type of AST node
 struct Node {
   NodeKind kind; // type of node
@@ -48,22 +25,6 @@ struct Node {
 
 // current token
 Token *token;
-
-char *user_input;
-
-// reports an error and exit
-void error_at(char *loc, char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-
-  int pos = loc - user_input;
-  fprintf(stderr, "%s\n", user_input);
-  fprintf(stderr, "%*s", pos, " ");
-  fprintf(stderr, "^ ");  
-  vfprintf(stderr, fmt, ap);
-  fprintf(stderr, "\n");
-  exit(1);
-}
 
 // consumes the current token if it matches 'op'
 bool consume(char *op) {
@@ -93,61 +54,6 @@ int expect_number() {
 
 bool at_eof() {
   return token->kind == TK_EOF;
-}
-
-Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
-  Token *tok = calloc(1, sizeof(Token));
-  tok->kind = kind;
-  tok->str = str;
-  tok->len = len;
-  cur->next = tok;
-  return tok;
-}
-
-bool startwith(char *p, char *q) {
-  return memcmp(p, q, strlen(q)) == 0;
-}
-
-Token *tokenize() {
-  char *p = user_input;
-  Token head;
-  head.next = NULL;
-  Token *cur = &head;
-
-  while (*p) {
-    // skip white spaces
-    if (isspace(*p)) {
-      p++;
-      continue;
-    }
-    
-    // multi-letter punctuator
-    if (startwith(p, "==") || startwith(p, "!=") ||
-	startwith(p, "<=") || startwith(p, ">=")) {
-      cur = new_token(TK_RESERVED, cur, p, 2);
-      p += 2;
-      continue;
-    }
-
-    // single-letter punctuator
-    if (strchr("+-*/()<>", *p)) {
-      cur = new_token(TK_RESERVED, cur, p++, 1);
-      continue;
-    }
-
-    if (isdigit(*p)) {
-      cur = new_token(TK_NUM, cur, p, 0);
-      char *q = p;
-      cur->val = strtol(p, &p, 10);
-      cur->len = p - q;
-      continue;
-    }
-
-    error_at(token->str, "invalid token");
-  }
-
-  new_token(TK_EOF, cur, p, 0);
-  return head.next;
 }
 
 Node *new_node(NodeKind kind) {
@@ -314,8 +220,7 @@ int main(int argc, char **argv)
   }
 
   // tokenize and parse input code
-  user_input = argv[1];
-  token = tokenize();
+  token = tokenize(argv[1]);
   Node *node = expr();
 
   // output the first half of assembly
