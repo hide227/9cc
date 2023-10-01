@@ -8,6 +8,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+//
+// tokenize.c
+//
+
 // kind of token
 typedef enum {
   TK_RESERVED, // keywords or punctuators
@@ -27,5 +31,32 @@ struct Token {
 
 void error_at(char *loc, char *fmt, ...);
 Token *tokenize(char *p);
+
+
+//
+// parse.c
+//
+
+// kind of AST node
+typedef enum {
+  ND_ADD, // +
+  ND_SUB, // -
+  ND_MUL, // *
+  ND_DIV, // /
+  ND_EQ,  // ==
+  ND_NE,  // !=
+  ND_LT,  // <
+  ND_LE,  // <=
+  ND_NUM, // integer
+} NodeKind;
+
+// type of AST node
+typedef struct Node Node;
+struct Node {
+  NodeKind kind; // type of node
+  Node *lhs;     // left-hand side
+  Node *rhs;     // right-hand side
+  int val;       // use if kind is ND_NUM
+};
 
 #endif

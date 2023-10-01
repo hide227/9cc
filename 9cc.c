@@ -1,28 +1,5 @@
 #include "9cc.h"
 
-typedef struct Node Node;
-
-// kind of AST node
-typedef enum {
-  ND_ADD, // +
-  ND_SUB, // -
-  ND_MUL, // *
-  ND_DIV, // /
-  ND_EQ,  // ==
-  ND_NE,  // !=
-  ND_LT,  // <
-  ND_LE,  // <=
-  ND_NUM, // integer
-} NodeKind;
-
-// type of AST node
-struct Node {
-  NodeKind kind; // type of node
-  Node *lhs;     // left-hand side
-  Node *rhs;     // right-hand side
-  int val;       // use if kind if ND_NUM
-};
-
 // current token
 Token *token;
 
