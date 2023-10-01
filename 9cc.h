@@ -59,4 +59,11 @@ struct Node {
   int val;       // use if kind is ND_NUM
 };
 
+
+//
+// codegen.c
+//
+
+void gen(Node *node);
+
 #endif
