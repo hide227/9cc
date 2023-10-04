@@ -15,6 +15,7 @@
 // kind of token
 typedef enum {
   TK_RESERVED, // keywords or punctuators
+  TK_IDENT,    // identifier
   TK_NUM,      // integer literals
   TK_EOF,      // EOF markers
 } TokenKind;
@@ -39,15 +40,17 @@ Token *tokenize(char *p);
 
 // kind of AST node
 typedef enum {
-  ND_ADD, // +
-  ND_SUB, // -
-  ND_MUL, // *
-  ND_DIV, // /
-  ND_EQ,  // ==
-  ND_NE,  // !=
-  ND_LT,  // <
-  ND_LE,  // <=
-  ND_NUM, // integer
+  ND_ADD,    // +
+  ND_SUB,    // -
+  ND_MUL,    // *
+  ND_DIV,    // /
+  ND_EQ,     // ==
+  ND_NE,     // !=
+  ND_LT,     // <
+  ND_LE,     // <=
+  ND_ASSIGN, // =
+  ND_LVAR,   // local variable
+  ND_NUM,    // integer
 } NodeKind;
 
 // type of AST node
@@ -57,17 +60,20 @@ struct Node {
   Node *lhs;     // left-hand side
   Node *rhs;     // right-hand side
   int val;       // use if kind is ND_NUM
+  int offset;    // use if kind is ND_LVAR
 };
 
 
 //
 // parse.c
 //
-Node *expr(Token *token);
+
+void *program(Token *token);
 
 
 //
 // codegen.c
+// //
 //
 
 void gen(Node *node);

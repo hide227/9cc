@@ -1,5 +1,10 @@
 #include "9cc.h"
 
+Node *code[100];
+
+Node *stmt(Token *token);
+Node *expr(Token *token);
+Node *assign(Token *token);
 Node *equality(Token *token);
 Node *relational(Token *token);
 Node *add(Token *token);
@@ -14,6 +19,10 @@ bool consume(Token *token, char *op) {
     return false;
   *token = *(token->next);
   return true;
+}
+
+bool at_eof(Token *token) {
+  return token->kind == TK_EOF;
 }
 
 void expect(Token *token, char *op) {
@@ -51,9 +60,31 @@ Node *new_num(int val) {
   return node;
 }
 
-// expr = equality
+// program = stmt*
+void *program(Token *token) {
+  int i = 0;
+  while (!at_eof(token))
+    code[i++] = stmt(token);
+  code[i] = NULL;
+}
+
+// stmt = expr ";"
+Node *stmt(Token *token) {
+  Node *node = expr(token);
+  expect(token, ";");
+  return node;
+}
+
+// expr = assign
 Node *expr(Token *token) {
+  Node *node = assign(token);
+}
+
+// assign = equality ("=" assign)?
+Node *assign(Token *token) {
   Node *node = equality(token);
+  if (consume(token, "="))
+    node = new_binary(ND_ASSIGN, node, assign(token));
 }
 
 // equality = relational ("==" relational | "!=" relational)*
@@ -125,7 +156,7 @@ Node *unary(Token *token) {
   return primary(token);
 }
 
-// primary = num | "(" expr ")"
+// primary = num | ident | "(" expr ")"
 Node *primary(Token *token) {
   if (consume(token, "(")) {
     Node *node = expr(token);
